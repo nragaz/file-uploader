@@ -2,16 +2,19 @@
  * http://github.com/valums/file-uploader
  * 
  * Multiple file upload component with progress-bar, drag-and-drop. 
- * © 2010 Andrew Valums ( andrew(at)valums.com ) 
+ * (c) 2010 Andrew Valums ( andrew(at)valums.com ) 
  * 
- * Licensed under GNU GPL 2 or later and GNU LGPL 2 or later, see license.txt.
- */    
+ * Licensed under GNU GPL 2 or later, see license.txt.
+ */
 
 //
 // Helper functions
 //
 
 var qq = qq || {};
+
+QQ_UPLOADER_BUTTON = 'Upload a file';
+QQ_UPLOADER_DRAG_PROMPT = 'Drop files here to upload';
 
 /**
  * Adds all missing properties from second obj to first obj
@@ -485,8 +488,15 @@ qq.FileUploader = function(o){
         listElement: null,
                 
         template: '<div class="qq-uploader">' + 
-                '<div class="qq-upload-drop-area"><span>Drop files here to upload</span></div>' +
-                '<div class="qq-upload-button">Upload a file</div>' +
+                '<div class="qq-upload-drop-area"><span>' +
+                  QQ_UPLOADER_DRAG_PROMPT +
+                '</span></div>' +
+                '<div class="qq-upload-button">' +
+                  QQ_UPLOADER_BUTTON +
+                '</div>' +
+                '<div class="qq-upload-drag-prompt">' +
+                  QQ_UPLOADER_DRAG_PROMPT +
+                '</div>' +
                 '<ul class="qq-upload-list"></ul>' + 
              '</div>',
 
@@ -505,12 +515,12 @@ qq.FileUploader = function(o){
             drop: 'qq-upload-drop-area',
             dropActive: 'qq-upload-drop-area-active',
             list: 'qq-upload-list',
-                        
+            
             file: 'qq-upload-file',
             spinner: 'qq-upload-spinner',
             size: 'qq-upload-size',
             cancel: 'qq-upload-cancel',
-
+            
             // added to list item when upload completes
             // used in css to hide progress spinner
             success: 'qq-upload-success',
@@ -571,11 +581,12 @@ qq.extend(qq.FileUploader.prototype, {
         });
                 
         dropArea.style.display = 'none';
-
+        
         qq.attach(document, 'dragenter', function(e){     
             if (!dz._isValidFileDrag(e)) return; 
             
-            dropArea.style.display = 'block';            
+            dropArea.style.display = 'block';
+            qq.addClass(dropArea, self._classes.dragStarted);
         });                 
         qq.attach(document, 'dragleave', function(e){
             if (!dz._isValidFileDrag(e)) return;            
@@ -584,6 +595,7 @@ qq.extend(qq.FileUploader.prototype, {
             // only fire when leaving document out
             if ( ! relatedTarget || relatedTarget.nodeName == "HTML"){               
                 dropArea.style.display = 'none';                                            
+                qq.removeClass(dropArea, self._classes.dragStarted);
             }
         });                
     },
@@ -767,13 +779,15 @@ qq.UploadButton = function(o){
     this._element = this._options.element;
     
     // make button suitable container for input
+    /*
     qq.css(this._element, {
         position: 'relative',
         overflow: 'hidden',
         // Make sure browse button is in the right side
         // in Internet Explorer
         direction: 'ltr'
-    });   
+    });
+    */
     
     this._input = this._createInput();
 };
@@ -801,7 +815,9 @@ qq.UploadButton.prototype = {
                 
         input.setAttribute("type", "file");
         input.setAttribute("name", this._options.name);
+        input.setAttribute("class", "qq-file-input");
         
+        /*      
         qq.css(input, {
             position: 'absolute',
             // in Opera only 'browse' button
@@ -817,9 +833,10 @@ qq.UploadButton.prototype = {
             cursor: 'pointer',
             opacity: 0
         });
+        */
         
         this._element.appendChild(input);
-
+        
         var self = this;
         qq.attach(input, 'change', function(){
             self._options.onChange(input);
@@ -940,7 +957,7 @@ qq.UploadHandlerAbstract.prototype = {
                 
         var max = this._options.maxConnections;
         
-        if (this._queue.length >= max && i < max){
+        if (this._queue.length >= max){
             var nextId = this._queue[max-1];
             this._upload(nextId, this._params[nextId]);
         }
