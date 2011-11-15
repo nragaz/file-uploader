@@ -816,6 +816,7 @@ qq.UploadButton.prototype = {
         input.setAttribute("type", "file");
         input.setAttribute("name", this._options.name);
         input.setAttribute("class", "qq-file-input");
+        input.setAttribute("id", "qq-file-input");
         
         /*      
         qq.css(input, {
