@@ -1055,14 +1055,17 @@ qq.extend(qq.UploadHandlerForm.prototype, {
             }
 
             // fixing Opera 10.53
-            if (iframe.contentDocument &&
-                iframe.contentDocument.body &&
-                iframe.contentDocument.body.innerHTML == "false"){
-                // In Opera event is fired second time
-                // when body.innerHTML changed from false
-                // to server response approx. after 1 sec
-                // when we upload file with iframe
-                return;
+            try{
+                if (iframe.contentDocument &&
+                    iframe.contentDocument.body &&
+                    iframe.contentDocument.body.innerHTML == "false"){
+                    // In Opera event is fired second time
+                    // when body.innerHTML changed from false
+                    // to server response approx. after 1 sec
+                    // when we upload file with iframe
+                    return;
+                }
+            } catch(err) {
             }
 
             callback();
@@ -1072,14 +1075,13 @@ qq.extend(qq.UploadHandlerForm.prototype, {
      * Returns json object received by iframe from server.
      */
     _getIframeContentJSON: function(iframe){
-        // iframe.contentWindow.document - for IE<7
-        var doc = iframe.contentDocument ? iframe.contentDocument: iframe.contentWindow.document,
-            response;
-
-        this.log("converting iframe's innerHTML to JSON");
-        this.log("innerHTML = " + doc.body.innerHTML);
-
         try {
+            // iframe.contentWindow.document - for IE<7
+            var doc = iframe.contentDocument ? iframe.contentDocument: iframe.contentWindow.document,
+                response;
+
+            this.log("converting iframe's innerHTML to JSON");
+            this.log("innerHTML = " + doc.body.innerHTML);
             response = eval("(" + doc.body.innerHTML + ")");
         } catch(err){
             response = {};
